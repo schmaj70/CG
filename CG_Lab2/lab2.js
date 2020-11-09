@@ -251,12 +251,12 @@ function render()
      modelViewMatrix = mult(modelViewMatrix, rotateX(thetaArr[xAxis]));
      gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
      
-     if(goingRight && leftToRightIncrement < 0.5){
+     if(goingRight && leftToRightIncrement < 1){
          leftToRightIncrement += 0.01;
-     }else if(!goingRight && leftToRightIncrement > -0.5){
+     }else if(!goingRight && leftToRightIncrement > -1){
          leftToRightIncrement -= 0.01
      }else{
-        goingRight != goingRight;
+        goingRight = !goingRight;
      }
     
      modelViewMatrix = mult(modelViewMatrix, translate(leftToRightIncrement, 0 ,0));
