@@ -1,9 +1,6 @@
 /**
  * CG_Lab2
  * 
- * 
- * Make it have one or more translations //TODO
- * Make it have one or more scalings //TODO
  * Do something "creative" //TODO
  * 
  * Create a 3d "W" //Missing two edges //BUG
@@ -12,6 +9,8 @@
  * Use  the  lookAt  function  to  change  the  default  position  of  the  camera  on  startup //DONE
  * create the projection matrix and send it to the vertex shader //DONE
  * Make it be red and shaded for a 3d effect //DONE
+ * Make it have one or more translations //DONE
+ * Make it have one or more scalings //DONE
  * 
  */
 var canvas;
@@ -25,10 +24,11 @@ var modelViewMatrix;
 var modelViewMatrixLoc;
 
 //stuff needed for scaling
+var scalingIncrement = 0.01;
+var growing = true;
 //stuff needed for translations
 var leftToRightIncrement = 0.01;
 var goingRight = true;
-
 
 //all the stuff needed for the rotations
 var xAxis = 0;
@@ -40,7 +40,7 @@ var thetaArr = [ 0, 0, 0 ];	// Angles of rotation for each axis
 //all the stuff needed for the camera
 var near = 0.3;         
 var far = 300.0;
-var radius = 4.0;// Used to establish eye point
+var radius = 6.0;// Used to establish eye point
 var theta  = 0.0;// Used to establish eye point
 var phi    = 0.0;// Used to establish eye point
 var rotation = 20.0 * Math.PI/180.0;
@@ -258,8 +258,18 @@ function render()
      }else{
         goingRight = !goingRight;
      }
+
+     if(growing && scalingIncrement < 2){
+        scalingIncrement += 0.01;
+    }else if(!growing && scalingIncrement > -2){
+        scalingIncrement -= 0.01
+    }else{
+        growing = !growing;
+    }
     
-     modelViewMatrix = mult(modelViewMatrix, translate(leftToRightIncrement, 0 ,0));
+    modelViewMatrix = mult(modelViewMatrix, translate(leftToRightIncrement, leftToRightIncrement ,leftToRightIncrement));
+
+    modelViewMatrix = mult(modelViewMatrix, scale(scalingIncrement, scalingIncrement, scalingIncrement));
 
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
