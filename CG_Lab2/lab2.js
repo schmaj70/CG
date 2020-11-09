@@ -26,6 +26,8 @@ var modelViewMatrixLoc;
 
 //stuff needed for scaling
 //stuff needed for translations
+var leftToRightIncrement = 0.01;
+var goingRight = true;
 
 
 //all the stuff needed for the rotations
@@ -247,8 +249,17 @@ function render()
      modelViewMatrix = mult(modelViewMatrix, rotateZ(thetaArr[zAxis]));
      modelViewMatrix = mult(modelViewMatrix, rotateY(thetaArr[yAxis]));
      modelViewMatrix = mult(modelViewMatrix, rotateX(thetaArr[xAxis]));
-     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) ); 
+     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
+     
+     if(goingRight && leftToRightIncrement < 0.5){
+         leftToRightIncrement += 0.01;
+     }else if(!goingRight && leftToRightIncrement > -0.5){
+         leftToRightIncrement -= 0.01
+     }else{
+        goingRight != goingRight;
+     }
     
+     modelViewMatrix = mult(modelViewMatrix, translate(leftToRightIncrement, 0 ,0));
 
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
