@@ -3,14 +3,14 @@
  * 
  * Do something "creative" //TODO
  * 
- * Create a 3d "W" //Missing two edges //BUG
+ * Create a 3d "W" 
  * 
- * Make it rotate on the screen accross various axis //DONE
- * Use  the  lookAt  function  to  change  the  default  position  of  the  camera  on  startup //DONE
- * create the projection matrix and send it to the vertex shader //DONE
- * Make it be red and shaded for a 3d effect //DONE
- * Make it have one or more translations //DONE
- * Make it have one or more scalings //DONE
+ * Make it rotate on the screen accross various axis 
+ * Use  the  lookAt  function  to  change  the  default  position  of  the  camera  on  startup 
+ * create the projection matrix and send it to the vertex shader 
+ * Make it be red and shaded for a 3d effect
+ * Make it have one or more translations 
+ * Make it have one or more scalings
  * 
  */
 var canvas;
@@ -23,21 +23,21 @@ var colors = [];
 var modelViewMatrix;
 var modelViewMatrixLoc;
 
-//stuff needed for scaling
+//variables needed for scaling
 var scalingIncrement = 0.01;
 var growing = true;
-//stuff needed for translations
-var leftToRightIncrement = 0.01;
-var goingRight = true;
+//variables needed for translations
+var translateIncrement = 0.01;
+var translating = true;
 
-//all the stuff needed for the rotations
+//variable needed for the rotations
 var xAxis = 0;
 var yAxis = 1;
 var zAxis = 2;
 var axis = 0;
 var thetaArr = [ 0, 0, 0 ];	// Angles of rotation for each axis
 
-//all the stuff needed for the camera
+//variables needed for the camera
 var near = 0.3;         
 var far = 300.0;
 var radius = 6.0;// Used to establish eye point
@@ -77,28 +77,31 @@ var vertices = [
 ];
 
 //colors for the "W"
+//"Creative" part of project is using random colors to generate the "W"
 var vertexColors = [
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(0.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(0.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(0.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(0.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(0.0, 0.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(0.0, 0.0, 0.0, 1.0)
     
+    //getRandomInt returns either a 1 or 0 randomly to generate a random color 
+
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
+    vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2))    
 ];
 
 window.onload = function init()
@@ -218,16 +221,23 @@ function colorW()
     quad(4, 2, 13);
 };
 
+//gets a random number between 1 and 2
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
 // fill in  the "W" with the colors
 function quad(a, b, c) 
 {
     var indices = [ a, b, c, a, c, b ];
 
     for ( var i = 0; i < indices.length; ++i ) {
+        
         positions.push( vertices[indices[i]] );
         colors.push( vertexColors[indices[i]] );
-
+        
     }
+
 };
 
 function render()
@@ -251,14 +261,16 @@ function render()
      modelViewMatrix = mult(modelViewMatrix, rotateX(thetaArr[xAxis]));
      gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
      
-     if(goingRight && leftToRightIncrement < 1){
-         leftToRightIncrement += 0.01;
-     }else if(!goingRight && leftToRightIncrement > -1){
-         leftToRightIncrement -= 0.01
+     //loops for translation
+     if(translating && translateIncrement < 1){
+        translateIncrement += 0.01;
+     }else if(!translating && translateIncrement > -1){
+        translateIncrement -= 0.01
      }else{
-        goingRight = !goingRight;
+        translating = !translating;
      }
 
+     //loops for scaling
      if(growing && scalingIncrement < 2){
         scalingIncrement += 0.01;
     }else if(!growing && scalingIncrement > -2){
@@ -267,8 +279,10 @@ function render()
         growing = !growing;
     }
     
-    modelViewMatrix = mult(modelViewMatrix, translate(leftToRightIncrement, leftToRightIncrement ,leftToRightIncrement));
+    //translate call
+    modelViewMatrix = mult(modelViewMatrix, translate(translateIncrement, translateIncrement ,translateIncrement));
 
+    //scale call
     modelViewMatrix = mult(modelViewMatrix, scale(scalingIncrement, scalingIncrement, scalingIncrement));
 
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
