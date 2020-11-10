@@ -15,8 +15,9 @@
  *  
  * Make it have one or more scalings
  * 
- * Do something "creative", I chose to make the "W" be colored in randomly each time, and added
- * the ability to move around the camera 
+ * Do something "creative", I chose to make the "W" be colored in randomly each time, added
+ * the ability to move around the camera, and made the "W" render differently depending on
+ * how it is currently translating on the screen
  */
 var canvas;
 var gl;
@@ -85,7 +86,7 @@ var vertices = [
 //"Creative" part of project is using random colors to generate the "W"
 var vertexColors = [
     
-    //getRandomInt returns either a 1 or 0 randomly to generate a random color 
+    //getRandomInt returns either a 1 or 0  to generate a random color 
     
     vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
     vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
@@ -109,6 +110,9 @@ var vertexColors = [
     vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2))    
 ];
 
+/**
+ * is executed when the window loads
+ */
 window.onload = function init()
 {
     canvas = document.getElementById( "gl-canvas" );
@@ -116,8 +120,7 @@ window.onload = function init()
     gl = canvas.getContext('webgl2');
     if ( !gl ) { alert( "WebGL 2.0 isn't available" ); }
 
-    //creates "W"
-    
+    //creates the "W"
     colorW();
 
     //set aspect ratio
@@ -175,10 +178,11 @@ window.onload = function init()
     render();
 };
 
-//all the indices for the "W"
+/**
+ * all the indices for the "W"
+ */
 function colorW()
 {
-
     //frontside
     quad(0, 1, 3);
     quad(3, 1, 2);
@@ -228,12 +232,21 @@ function colorW()
     quad(4, 2, 13);
 };
 
-//gets a random number between 1 and 2
+/**
+ * Gets a random number based the max
+ * @param {int} max 
+ */
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
   };
 
-// fill in  the "W" with the colors
+/**
+ * Pushes the colors to the W
+ * 
+ * @param {*} a 
+ * @param {*} b 
+ * @param {*} c 
+ */
 function quad(a, b, c) 
 {
     var indices = [ a, b, c, a, c, b ];
@@ -247,6 +260,9 @@ function quad(a, b, c)
 
 };
 
+/**
+ * renders the image on the screen
+ */
 function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -292,11 +308,18 @@ function render()
     //scale call
     modelViewMatrix = mult(modelViewMatrix, scale(scalingIncrement, scalingIncrement, scalingIncrement));
 
+    
+
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
 
+    //"Creative" part of the project, changes to lines when translating left, goes back solid if going left
+    if (translating) {
+        gl.drawArrays(gl.TRIANGLES, 0, numPositions);
+    } else {
+        gl.drawArrays(gl.LINE_STRIP, 0, numPositions);
+    }
     
-    gl.drawArrays( gl.TRIANGLES, 0, numPositions );
 
     requestAnimationFrame( render );
 };
