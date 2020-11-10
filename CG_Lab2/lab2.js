@@ -80,7 +80,7 @@ var vertices = [
 var vertexColors = [
     
     //getRandomInt returns either a 1 or 0 randomly to generate a random color 
-
+    
     vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
     vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
     vec4(getRandomInt(2), getRandomInt(2), getRandomInt(2), getRandomInt(2)),
@@ -111,6 +111,7 @@ window.onload = function init()
     if ( !gl ) { alert( "WebGL 2.0 isn't available" ); }
 
     //creates "W"
+    
     colorW();
 
     //set aspect ratio
@@ -171,6 +172,7 @@ window.onload = function init()
 //all the indices for the "W"
 function colorW()
 {
+
     //frontside
     quad(0, 1, 3);
     quad(3, 1, 2);
@@ -223,7 +225,19 @@ function colorW()
 //gets a random number between 1 and 2
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
-  }
+  };
+
+function noWhite(){
+    for(var i = 0; i < 60; i++){
+        if(colorArr[i-1] != 0 && colorArr[i-2] != 0 && colorArr[i-3] != 0 ){
+            colorArr.push(getRandomInt(2));
+        }else{
+        colorArr.push(1);
+        }
+    }
+        
+   
+};
 
 // fill in  the "W" with the colors
 function quad(a, b, c) 
