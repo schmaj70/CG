@@ -4,13 +4,19 @@
  * Create a 3d "W" 
  * 
  * Make it rotate on the screen accross various axes 
- * Use  the  lookAt  function  to  change  the  default  position  of  the  camera  on  startup 
- * create the projection matrix and send it to the vertex shader 
- * Make it be created with different colors for a 3d effect
- * Make it have one or more translations 
- * Make it have one or more scalings
- * Do something "creative", I chose to make the "W" be colored in randomly each time
  * 
+ * Use  the  lookAt  function  to  change  the  default  position  of  the  camera  on  startup 
+ * 
+ * create the projection matrix and send it to the vertex shader 
+ * 
+ * Make it be created with different colors for a 3d effect
+ * 
+ * Make it have one or more translations
+ *  
+ * Make it have one or more scalings
+ * 
+ * Do something "creative", I chose to make the "W" be colored in randomly each time, and added
+ * the ability to move around the camera 
  */
 var canvas;
 var gl;
