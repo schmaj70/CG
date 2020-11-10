@@ -227,18 +227,6 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
   };
 
-function noWhite(){
-    for(var i = 0; i < 60; i++){
-        if(colorArr[i-1] != 0 && colorArr[i-2] != 0 && colorArr[i-3] != 0 ){
-            colorArr.push(getRandomInt(2));
-        }else{
-        colorArr.push(1);
-        }
-    }
-        
-   
-};
-
 // fill in  the "W" with the colors
 function quad(a, b, c) 
 {
