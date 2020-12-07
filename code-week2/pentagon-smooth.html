@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+in vec4 vPosition;
+in  vec4 vColor;
+out vec4 tColor;
+uniform float theta;
+
+void main()
+{
+  tColor = vColor;
+  gl_Position = vec4(cos(theta) * vPosition.x - sin(theta) * vPosition.y ,
+		     sin(theta) * vPosition.x + cos(theta) * vPosition.y ,
+		     0.0, 1.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+precision mediump float;
+in vec4 tColor;
+out vec4 fColor;
+
+void main()
+{
+    fColor = tColor;
+}
+
+</script>
+
+<!--Ed Angel's WebGL support libraries-->
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="pentagon-smooth.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">>
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+<!--Our JS code has event listeners for these buttons-->
+<button id= "CCButton">Rotate Counter-Clockwise</button>
+<button id= "CLButton">Rotate Clockwise</button>
+
+</body>
+</html>

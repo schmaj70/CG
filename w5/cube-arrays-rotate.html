@@ -1,0 +1,48 @@
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+in  vec4 vPosition;
+in  vec4 vColor;
+out vec4 tColor;
+
+uniform mat4 modelViewMatrix;
+
+void main() 
+{    
+	gl_Position = modelViewMatrix*vPosition;
+    tColor = vColor;
+} 
+
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+precision mediump float;
+in vec4 tColor;  
+out vec4 fColor;
+
+void main()
+{
+    fColor = tColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="cube-arrays-rotate.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512"" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+   
+<br/>
+
+<!--Our JS code has event listeners for these buttons-->
+<button id= "xButton">Rotate X</button>
+<button id= "yButton">Rotate Y</button>
+<button id= "zButton">Rotate Z</button>
+
+</body>
+</html>
