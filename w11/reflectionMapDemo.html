@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+out vec3 R;
+in vec4 vPosition;
+in vec4 vNormal;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
+
+void main()
+{
+    gl_Position = projectionMatrix*modelViewMatrix*vPosition;
+     
+    vec3 eyePos  = normalize((modelViewMatrix*vPosition).xyz); 
+
+    vec3 N = normalize(normalMatrix*vNormal.xyz); 
+    
+    R = reflect(eyePos, N);  
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+precision mediump float;
+
+in vec3 R;
+out vec4  fColor;
+uniform samplerCube texMap;
+
+void main()
+{
+    vec4 texColor = texture(texMap, R);
+    fColor = texColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="sphere.js"></script>
+<script type="text/javascript" src="reflectionMapDemo.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+
+<p>
+<button id = "Button2">Increase theta</button>
+<button id = "Button3">Decrease theta</button>
+<button id = "Button4">Increase phi</button>
+<button id = "Button5">Decrease phi</button>
+</p>
+
+</body>
+</html>
