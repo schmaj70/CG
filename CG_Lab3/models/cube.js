@@ -1,4 +1,4 @@
-var myMesh =
+var myMesh2 =
 {
   "version" : "0.1.0",
 
