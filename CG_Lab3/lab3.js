@@ -1,22 +1,44 @@
 /**
+ * Jeff Schmadebeck
+ * Graphics lab 3
  * 
- * lighting (DONE)
- * mesh obj (DONE)
- * move camera (DONE)
+ * *I USED 2 OF MY 3 EXTRA DAYS ON THIS PROJECT*
+ *  
  * 
- * cube (TODO)
- * sphere (TODO)
+ * How I modeled each object?
+ * -i used 3 different mesh files, 1 sphere, 1 cube, 1 bunny
+ * 
+ * Material properties of each object?
+ * -each object has the same properties, all blue materials with white light
+ * 
+ * Lighting model i used?
+ * -phong-blinn
+ * 
+ * initial position of light/camera?
+ * -light =  vec4(5.0, -10.0, 20.0, 1.0);
+ * -camera
+ *  near = -100;
+ *  far = 100;
+ *  left = -300.0;
+ *  right = 300.0;
+ *  ytop = 300.0;
+ *  bottom = -300.0;
+ * 
+ * how and to what extent can camera move?
+ * -you can rotate with buttons by 50 degrees each time
+ * 
  * 
  */
 var canvas;
 var gl;
 
+//camera stuff
 var near = -100;
 var far = 100;
-var left = -100.0;
-var right = 100.0;
-var ytop = 100.0;
-var bottom = -100.0;
+var left = -300.0;
+var right = 300.0;
+var ytop = 300.0;
+var bottom = -300.0;
 
 var radius = 40.0;
 var theta = 0.0;
@@ -27,23 +49,25 @@ var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
 
 var modelViewMatrix, projectionMatrix;
-var program1, vPosition1, vColor, projectionMatrix1Loc, modelViewMatrix1Loc;
-var program2, vPosition2, projectionMatrix2Loc, modelViewMatrix2Loc;
+var program1, vPosition, vColor;
 var modelViewMatrixLoc, projectionMatrixLoc;
-
-//Position is in homogeneous coordinates
-//If w =1.0, we are specifying a finite (x,y,z) location
-//If w =0.0, light at infinity
-var lightPosition = vec4(5.0, -10.0, 20.0, 1.0);
 
 //bunny
 var vertices1 = myMesh1.vertices[0].values;
 var indices1 = myMesh1.connectivity[0].indices;
-var iBuffer1, vBuffer1;
-
+var iBuffer1, vBuffer1, nBuffer, vNormal;
 var normals1 = myMesh1.vertices[1].values;
 
-//light
+//cube
+var vertices2 = myMesh2.vertices[0].values;
+var indices2 = myMesh2.connectivity[0].indices;
+
+//sphere
+var vertices3 = myMesh3.vertices[0].values;
+var indices3 = myMesh3.connectivity[0].indices;
+
+//light stuff
+var lightPosition = vec4(5.0, -10.0, 20.0, 1.0);
 var lightDiffuse1 = vec4(1.0, 1.0, 1.0, 1.0); // white light
 var lightAmbient1 = vec4(0.2, 0.2, 0.2, 1.0);
 var lightSpecular1 = vec4(1.0, 1.0, 1.0, 1.0);
@@ -68,39 +92,58 @@ window.onload = function init() {
 
     gl.enable(gl.DEPTH_TEST);
 
-    //  Load shaders and initialize attribute buffers
-    program = initShaders( gl, "vertex-shader", "fragment-shader");
-   
-    //program1 for square and triangle
+    //Load shaders and initialize attribute buffers
+    program = initShaders(gl, "vertex-shader", "fragment-shader");
+
+    //program for everything
     gl.useProgram(program);
 
-    //Object 3: mesh
+    //Object 1: bunny
     //array element buffer
     iBuffer1 = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer1);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices1), gl.STATIC_DRAW);
-    
-    //vertex array attribute buffer   
-    vBuffer1 = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer1);
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(vertices1), gl.STATIC_DRAW);
 
-    //set variables for program2
-    vPosition2 = gl.getAttribLocation(program, "vPosition");
-    projectionMatrix2Loc = gl.getUniformLocation(program, "projectionMatrix");
-    modelViewMatrix2Loc = gl.getUniformLocation(program, "modelViewMatrix");
+    //vertex array attribute buffer 1  
+    vBuffer1 = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer1);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices1), gl.STATIC_DRAW);
+
+    //Object 2: Cube
+    iBuffer2 = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer2);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices2), gl.STATIC_DRAW);
+
+    //vertex array attribute buffer  2  
+    vBuffer2 = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer2);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices2), gl.STATIC_DRAW);
+
+    //Object 3: Sphere
+    iBuffer3 = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer3);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices3), gl.STATIC_DRAW);
+
+    //vertex array attribute buffer  3  
+    vBuffer3 = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer3);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices3), gl.STATIC_DRAW);
+
+    //set variables for program
+    vPosition = gl.getAttribLocation(program, "vPosition");
+    projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+    modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
     // vertex normal buffer   
-    var nBuffer = gl.createBuffer();
+    nBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals1), gl.STATIC_DRAW);
-    
 
-    var vNormal = gl.getAttribLocation(program, "vNormal");
+    vNormal = gl.getAttribLocation(program, "vNormal");
     gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vNormal);
 
@@ -111,8 +154,6 @@ window.onload = function init() {
     var ambientProduct1 = mult(lightAmbient1, materialAmbient1);
     var diffuseProduct1 = mult(lightDiffuse1, materialDiffuse1);
     var specularProduct1 = mult(lightSpecular1, materialSpecular1);
-
-    
 
     gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
         flatten(ambientProduct1));
@@ -147,6 +188,7 @@ window.onload = function init() {
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    //camera stuff
     var eye = vec3(radius * Math.sin(theta) * Math.cos(phi),
         radius * Math.sin(theta) * Math.sin(phi),
         radius * Math.cos(theta));
@@ -154,19 +196,35 @@ function render() {
     modelViewMatrix = lookAt(eye, at, up);
     projectionMatrix = ortho(left, right, bottom, ytop, near, far);
 
-    //Draw object 3:Mesh
-    //change program
-    gl.useProgram(program); 
-    gl.uniformMatrix4fv( projectionMatrix2Loc, false, flatten(projectionMatrix));
-    gl.uniformMatrix4fv( modelViewMatrix2Loc, false, flatten(modelViewMatrix));
-    
+    //draw images
+    gl.useProgram(program);
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
+
+    //Draw object 1: bunny
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer1);
- 
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer1);
-    gl.vertexAttribPointer(vPosition1, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vPosition1);
-    
-    gl.drawElements(gl.TRIANGLES, indices1.length, gl.UNSIGNED_SHORT, 0);   
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+    gl.drawElements(gl.TRIANGLES, indices1.length, gl.UNSIGNED_SHORT, 0);
+
+    //Draw object 2: cube
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer2);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer2);
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+    gl.drawElements(gl.TRIANGLES, indices2.length, gl.UNSIGNED_SHORT, 0);
+
+    //Draw object 3: Sphere
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer3);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer3);
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+    gl.drawElements(gl.TRIANGLES, indices3.length, gl.UNSIGNED_SHORT, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
+    gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vNormal);
 
     requestAnimationFrame(render);
 }
