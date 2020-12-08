@@ -27,6 +27,8 @@ var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
 
 var modelViewMatrix, projectionMatrix;
+var program1, vPosition1, vColor, projectionMatrix1Loc, modelViewMatrix1Loc;
+var program2, vPosition2, projectionMatrix2Loc, modelViewMatrix2Loc;
 var modelViewMatrixLoc, projectionMatrixLoc;
 
 //Position is in homogeneous coordinates
@@ -37,8 +39,11 @@ var lightPosition = vec4(5.0, -10.0, 20.0, 1.0);
 //bunny
 var vertices1 = myMesh1.vertices[0].values;
 var indices1 = myMesh1.connectivity[0].indices;
+var iBuffer1, vBuffer1;
+
 var normals1 = myMesh1.vertices[1].values;
 
+//light
 var lightDiffuse1 = vec4(1.0, 1.0, 1.0, 1.0); // white light
 var lightAmbient1 = vec4(0.2, 0.2, 0.2, 1.0);
 var lightSpecular1 = vec4(1.0, 1.0, 1.0, 1.0);
@@ -47,36 +52,6 @@ var materialDiffuse1 = vec4(0.0, 0.0, 1.0, 1.0); // blue material
 var materialAmbient1 = vec4(1.0, 1.0, 1.0, 1.0);
 var materialSpecular1 = vec4(1.0, 1.0, 1.0, 1.0);
 var materialShininess1 = 100.0;
-
-//cube
-// var vertices2 = myMesh2.vertices[0].values;
-// var indices2 = myMesh2.connectivity[0].indices;
-// var normals2 = myMesh2.vertices[1].values;
-
-// var lightDiffuse2 = vec4(1.0, 1.0, 1.0, 1.0); // white light
-// var lightAmbient2 = vec4(0.2, 0.2, 0.2, 1.0);
-// var lightSpecular2 = vec4(1.0, 1.0, 1.0, 1.0);
-
-// var materialDiffuse2 = vec4(1.0, 0.0, 0.0, 1.0); // red material
-// var materialAmbient2 = vec4(1.0, 1.0, 1.0, 1.0);
-// var materialSpecular2 = vec4(1.0, 1.0, 1.0, 1.0);
-// var materialShininess2 = 100.0;
-//sphere
-// var vertices3 = myMesh3.vertices[0].values;
-// var indices3 = myMesh3.connectivity[0].indices;
-// var normals3 = myMesh3.vertices[1].values;
-
-// var lightDiffuse3 = vec4(1.0, 1.0, 1.0, 1.0); // white light
-// var lightAmbient3 = vec4(0.2, 0.2, 0.2, 1.0);
-// var lightSpecular3 = vec4(1.0, 1.0, 1.0, 1.0);
-
-// var materialDiffuse3 = vec4(0.0, 1.0, 0.0, 1.0); // green material
-// var materialAmbient3 = vec4(1.0, 1.0, 1.0, 1.0);
-// var materialSpecular3 = vec4(1.0, 1.0, 1.0, 1.0);
-// var materialShininess3 = 100.0;
-
-
-
 var nf;
 
 window.onload = function init() {
@@ -94,26 +69,26 @@ window.onload = function init() {
     gl.enable(gl.DEPTH_TEST);
 
     //  Load shaders and initialize attribute buffers
-    var program = initShaders(gl, "vertex-shader", "fragment-shader");
+    program = initShaders( gl, "vertex-shader", "fragment-shader");
+   
+    //program1 for square and triangle
     gl.useProgram(program);
 
-    // array element buffer   
-    var iBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+    //Object 3: mesh
+    //array element buffer
+    iBuffer1 = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer1);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices1), gl.STATIC_DRAW);
-    // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices2), gl.STATIC_DRAW);
-    // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices3), gl.STATIC_DRAW);
+    
+    //vertex array attribute buffer   
+    vBuffer1 = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer1);
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(vertices1), gl.STATIC_DRAW);
 
-    // setViewParams(vertices1);
-    // setViewParams(vertices2);
-    // setViewParams(vertices3);
-
-    // vertex array attribute buffer  
-    var vBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices1), gl.STATIC_DRAW);
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices2), gl.STATIC_DRAW);
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices3), gl.STATIC_DRAW);
+    //set variables for program2
+    vPosition2 = gl.getAttribLocation(program, "vPosition");
+    projectionMatrix2Loc = gl.getUniformLocation(program, "projectionMatrix");
+    modelViewMatrix2Loc = gl.getUniformLocation(program, "modelViewMatrix");
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
@@ -123,8 +98,7 @@ window.onload = function init() {
     var nBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals1), gl.STATIC_DRAW);
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals2), gl.STATIC_DRAW);
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals3), gl.STATIC_DRAW);
+    
 
     var vNormal = gl.getAttribLocation(program, "vNormal");
     gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
@@ -138,13 +112,7 @@ window.onload = function init() {
     var diffuseProduct1 = mult(lightDiffuse1, materialDiffuse1);
     var specularProduct1 = mult(lightSpecular1, materialSpecular1);
 
-    // var ambientProduct2 = mult(lightAmbient2, materialAmbient2);
-    // var diffuseProduct2 = mult(lightDiffuse2, materialDiffuse2);
-    // var specularProduct2 = mult(lightSpecular2, materialSpecular2);
-
-    // var ambientProduct3 = mult(lightAmbient3, materialAmbient3);
-    // var diffuseProduct3 = mult(lightDiffuse3, materialDiffuse3);
-    // var specularProduct3 = mult(lightSpecular3, materialSpecular3);
+    
 
     gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
         flatten(ambientProduct1));
@@ -156,28 +124,6 @@ window.onload = function init() {
         flatten(lightPosition));
     gl.uniform1f(gl.getUniformLocation(program, "shininess"),
         materialShininess1);
-
-    // gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
-    //     flatten(ambientProduct2));
-    // gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"),
-    //     flatten(diffuseProduct2));
-    // gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"),
-    //     flatten(specularProduct2));
-    // gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"),
-    //     flatten(lightPosition));
-    // gl.uniform1f(gl.getUniformLocation(program, "shininess"),
-    //     materialShininess2);
-
-    // gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
-    //     flatten(ambientProduct3));
-    // gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"),
-    //     flatten(diffuseProduct3));
-    // gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"),
-    //     flatten(specularProduct3));
-    // gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"),
-    //     flatten(lightPosition));
-    // gl.uniform1f(gl.getUniformLocation(program, "shininess"),
-    //     materialShininess3);
 
     // buttons for moving viewer and changing size
     document.getElementById("Button1").onclick = function () { near *= 1.02 };
@@ -208,14 +154,19 @@ function render() {
     modelViewMatrix = lookAt(eye, at, up);
     projectionMatrix = ortho(left, right, bottom, ytop, near, far);
 
-    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
-    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
-    // Display the current near and far values
-    nf.innerHTML = 'near: ' + Math.round(near * 100) / 100 + ', far: ' + Math.round(far * 100) / 100;
-
-    gl.drawElements(gl.TRIANGLES, indices1.length, gl.UNSIGNED_SHORT, 0); // SHORT because uint16 above
-    // gl.drawElements(gl.TRIANGLES, indices2.length, gl.UNSIGNED_SHORT, 0); // SHORT because uint16 above
-    // gl.drawElements(gl.TRIANGLES, indices3.length, gl.UNSIGNED_SHORT, 0); // SHORT because uint16 above
+    //Draw object 3:Mesh
+    //change program
+    gl.useProgram(program); 
+    gl.uniformMatrix4fv( projectionMatrix2Loc, false, flatten(projectionMatrix));
+    gl.uniformMatrix4fv( modelViewMatrix2Loc, false, flatten(modelViewMatrix));
+    
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer1);
+ 
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer1);
+    gl.vertexAttribPointer(vPosition1, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition1);
+    
+    gl.drawElements(gl.TRIANGLES, indices1.length, gl.UNSIGNED_SHORT, 0);   
 
     requestAnimationFrame(render);
 }
